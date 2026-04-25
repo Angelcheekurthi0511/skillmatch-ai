@@ -1,9 +1,7 @@
 flask
 flask-cors
-pymupdf
-sentence-transformers
-faiss-cpu
-numpy
-google-generativeai
 python-dotenv
+groq
+PyPDF2
+pymupdf
 gunicorn
