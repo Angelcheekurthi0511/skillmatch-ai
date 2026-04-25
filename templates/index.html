@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SkillMatch AI</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+}
+
+.container {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    width: 60%;
+    margin: auto;
+}
+
+input, textarea {
+    width: 90%;
+    padding: 10px;
+    margin: 10px;
+}
+
+button {
+    padding: 10px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.card {
+    background: rgba(255,255,255,0.2);
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚀 SkillMatch AI</h1>
+
+<div class="container">
+
+<input type="file" id="resume"><br>
+<textarea id="job_description" placeholder="Paste Job Description"></textarea><br>
+
+<button onclick="analyzeResume()">Analyze</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+async function analyzeResume() {
+    const file = document.getElementById("resume").files[0];
+    const jd = document.getElementById("job_description").value;
+
+    if (!file || !jd) {
+        alert("Please upload resume and enter job description");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("job_description", jd);
+
+    document.getElementById("result").innerHTML =
+        "<p>⏳ Analyzing...</p>";
+
+    try {
+        const res = await fetch("/analyze", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await res.json();
+
+        let coursesHTML = "";
+        if (data.courses) {
+            coursesHTML = data.courses.map(c =>
+                `<li><a href="${c.link}" target="_blank">${c.name}</a></li>`
+            ).join("");
+        }
+
+        document.getElementById("result").innerHTML = `
+            <div class="card">🎯 Score: ${data.match_score}%</div>
+            <div class="card">Matched: ${data.matched_skills.join(", ")}</div>
+            <div class="card">Missing: ${data.missing_skills.join(", ")}</div>
+            <div class="card">Suggestions: ${data.suggestions.join(", ")}</div>
+            <div class="card">Courses: <ul>${coursesHTML}</ul></div>
+            <div class="card">Summary: ${data.summary}</div>
+        `;
+
+    } catch (err) {
+        document.getElementById("result").innerHTML =
+            "<p style='color:red;'>Error</p>";
+    }
+}
+</script>
+
+</body>
+</html>
